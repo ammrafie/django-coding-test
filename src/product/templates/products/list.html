@@ -10,7 +10,7 @@
 
 
     <div class="card">
-        <form action="" method="get" class="card-header">
+        <form action="" method="post" class="card-header"> {% csrf_token %}
             <div class="form-row justify-content-between">
                 <div class="col-md-2">
                     <input type="text" name="title" placeholder="Product Title" class="form-control">
@@ -18,7 +18,9 @@
                 <div class="col-md-2">
                     <select name="variant" id="" class="form-control">
                         <option selected disabled>--Select A Variant--</option>
-
+                        {% for opt in variants %}
+                        <option>{{ opt.title }}</option>
+                        {% endfor %}
                     </select>
                 </div>
 
