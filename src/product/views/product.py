@@ -1,6 +1,6 @@
 from django.views import generic
 
-from product.models import Variant, Product
+from product.models import Variant, Product, ProductVariant
 
 
 class CreateProductView(generic.TemplateView):
@@ -24,7 +24,6 @@ class ListProductView(generic.ListView):
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        # TODO: Unclear about how size/color/type should be filtered
         # NOTE: Unclear about how date should be filtered
 
         context = []
@@ -44,20 +43,24 @@ class ListProductView(generic.ListView):
         for p in products:
             variants = []
             for pvp in p.productvariantprice_set.all():
-                specs = '/'.join([
-                    pvp.product_variant_one.variant_title if pvp.product_variant_one else "",
-                    pvp.product_variant_two.variant_title if pvp.product_variant_two else "",
-                    pvp.product_variant_three.variant_title if pvp.product_variant_three else "",
-                ])
-                if p_pricefrom and float(pvp.price) < float(p_pricefrom):
-                    continue
-                if p_priceto and float(pvp.price) > float(p_priceto):
-                    continue
+                variant_1 = pvp.product_variant_one.variant_title if pvp.product_variant_one else ""
+                variant_2 = pvp.product_variant_two.variant_title if pvp.product_variant_two else ""
+                variant_3 = pvp.product_variant_three.variant_title if pvp.product_variant_three else ""
+                specs = '/'.join([i for i in (variant_1, variant_2, variant_3) if i != ""])
+                if p_pricefrom and float(pvp.price) < float(p_pricefrom): continue
+                if p_priceto and float(pvp.price) > float(p_priceto): continue
+                if p_variant:
+                    if p_variant != variant_1 and p_variant != variant_2 and p_variant != variant_3:
+                        continue
                 variants.append({'specs': specs, 'price': pvp.price, 'stock': pvp.stock})
-            context.append({'data': p, 'variants': variants})
+            if variants: context.append({'data': p, 'variants': variants})
         return context
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['variants'] = Variant.objects.all()
+        v_dict = dict()
+        variant_values = ProductVariant.objects.values('variant_title').distinct()
+        for vtype in Variant.objects.all():
+            v_dict[vtype.title] = variant_values.filter(variant=vtype)
+        data['variants_values'] = v_dict
         return data

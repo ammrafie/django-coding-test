@@ -18,8 +18,10 @@
                 <div class="col-md-2">
                     <select name="variant" id="" class="form-control">
                         <option selected disabled>--Select A Variant--</option>
-                        {% for opt in variants %}
-                        <option>{{ opt.title }}</option>
+                        {% for var_type, var_set in variants_values.items %}
+                        <optgroup label="{{var_type}}">
+                            {% for opt in var_set %} <option>{{ opt.variant_title }}</option> {% endfor %}
+                        </optgroup>
                         {% endfor %}
                     </select>
                 </div>
