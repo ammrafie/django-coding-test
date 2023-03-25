@@ -1,5 +1,6 @@
 from django.urls import path
 from django.views.generic import TemplateView
+from .api_views import ProductCreate
 
 from product.views.product import CreateProductView, ListProductView
 from product.views.variant import VariantView, VariantCreateView, VariantEditView
@@ -17,4 +18,6 @@ urlpatterns = [
     path('list/', ListProductView.as_view(template_name='products/list.html', extra_context={
         'product': True
     }), name='list.product'),
+
+    path('api/v1/products/new', ProductCreate.as_view()),
 ]

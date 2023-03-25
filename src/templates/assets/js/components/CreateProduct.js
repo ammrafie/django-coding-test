@@ -2,9 +2,15 @@ import React, {useState} from 'react';
 import TagsInput from 'react-tagsinput';
 import 'react-tagsinput/react-tagsinput.css';
 import Dropzone from 'react-dropzone'
+import axios from "axios";
+import { useRef } from "react";
 
 
 const CreateProduct = (props) => {
+
+    const pName = useRef();
+    const pSku = useRef();
+    const pDesc = useRef();
 
     const [productVariantPrices, setProductVariantPrices] = useState([])
 
@@ -74,10 +80,40 @@ const CreateProduct = (props) => {
         return ans;
     }
 
+    // let constructProductData = () => {
+    //     const productData = {
+    //         product: {
+    //             title: pName.current.value, sku: pSku.current.value,
+    //             description: pDesc.current.value,
+    //         },
+    //         variants: [],
+    //     };
+    //     productVariants.forEach((pVarSet) => {
+    //         pVarSet.tags.forEach(pVar => {
+    //             productData.variants.push({
+    //                 variant_title: pVar, variant: pVarSet.option,
+    //             });
+    //         });
+    //     });
+    //     return productData;
+    // }
+
     // Save product
     let saveProduct = (event) => {
         event.preventDefault();
         // TODO : write your code here to save the product
+
+        axios.defaults.xsrfCookieName = 'csrftoken';
+        axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+
+        axios.post('http://127.0.0.1:8000/product/api/v1/products/new', {
+            title: pName.current.value, sku: pSku.current.value, description:pDesc.current.value,
+        })
+        .then(response => {
+            alert('Success!!');
+            pName.current.value = ""; pSku.current.value = ""; pDesc.current.value = "";
+        })
+        .catch(error => { alert('Failed!!'); });
     }
 
 
@@ -90,15 +126,15 @@ const CreateProduct = (props) => {
                             <div className="card-body">
                                 <div className="form-group">
                                     <label htmlFor="">Product Name</label>
-                                    <input type="text" placeholder="Product Name" className="form-control"/>
+                                    <input type="text" placeholder="Product Name" className="form-control" ref={pName} />
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="">Product SKU</label>
-                                    <input type="text" placeholder="Product Name" className="form-control"/>
+                                    <input type="text" placeholder="Product Name" className="form-control" ref={pSku} />
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="">Description</label>
-                                    <textarea id="" cols="30" rows="4" className="form-control"></textarea>
+                                    <textarea id="" cols="30" rows="4" className="form-control" ref={pDesc} ></textarea>
                                 </div>
                             </div>
                         </div>
